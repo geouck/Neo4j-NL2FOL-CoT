@@ -16,7 +16,8 @@ if __name__ == "__main__":
     for i in range(len(fol)):
         print(i, fol[i])
         try:
-            script = CVCGenerator(fol[i].replace("ForAll", "forall").replace("ThereExists", "exists").replace("&","and").replace("~","not ")).generateCVCScript()
+            cleaned_fol = str(fol[i]).replace("ForAll", "forall").replace("ThereExists", "exists").replace("&","and").replace("~","not ").replace("Properties:","").replace("Claim:","").replace("Implication:","").replace("), ", ") and ").replace("), ", ") and ")
+            script = CVCGenerator(cleaned_fol).generateCVCScript()
             with open("results/{}_smt/{}.smt2".format(run_name,i), "w") as f:
                 f.write(script)
             with open("results/{}_smt/{}_out.txt".format(run_name,i), "w") as f:
@@ -28,7 +29,7 @@ if __name__ == "__main__":
                     results.append("")
                 result, _ = proc_result.split("\n", 1)
                 if "unknown" in result:
-                    script = CVCGenerator(fol[i].replace("ForAll", "forall").replace("ThereExists", "exists").replace("&", "and").replace("~", "not ")).generateCVCScript(finite_model_finding=True)
+                    script = CVCGenerator(cleaned_fol).generateCVCScript(finite_model_finding=True)
                     with open("results/{}_smt/{}.smt2".format(run_name,i), "w") as f2:
                         f2.write(script)
                     # Run CVC5 and capture output

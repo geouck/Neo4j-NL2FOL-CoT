@@ -1,41 +1,41 @@
-Given a sentence, the referring expressions of that sentence, and properties which are associated with the referring expressions. Use the given properties to convert the sentence into a first order logical form.  Use -> to represent implies, & to represent and, | to represent or and ~ to represent negations. 
- 
+Given a sentence, the referring expressions of that sentence, and properties which are associated with the referring expressions. Use the given properties to convert the sentence into a first order logical form using STRICT functional string format with parentheses (). Use Implies(A, B) for implies, And() for and, Or() for or, and Not() for negations. For quantifiers, use EXACTLY the syntax Exists(x, Body) or ForAll(x, Body) where the first argument is a single variable and the second argument is the function body. Do NOT use standard text logic operators (like &, |, ->, ~). CRITICAL: Do NOT use Higher-Order Logic. Predicates cannot be passed as arguments inside other predicates. For example, Recommends(a, Needs(b, c)) is ILLEGAL. Instead, flatten them into single-state Boolean properties linked by logic, such as And(Recommends(a), Needs(b, c)).
+
 Example 1:  
- 
+
 Input Sentence: A tall man loves cheese 
- 
+
 Referring Expressions: A tall man: x 
- 
+
 Properties: IsTall(x) , LovesCheese(x) 
- 
-Logical Form: IsTall(x) & LovesCheese(x) 
- 
+
+Logical Form: And(IsTall(x), LovesCheese(x))
+
 Example 2: 
- 
+
 Input Sentence: Smacking children stops bad behavior 
- 
+
 Referring expressions: Children: x 
- 
+
 Properties: IsSmacked(x), HasBadBehavior(x)
 
-Logical Form: IsSmacked(x) -> ~HasBadBehavior(x)
+Logical Form: Implies(IsSmacked(x), Not(HasBadBehavior(x)))
  
 Example 3: 
- 
+
 Input Sentence: "Giving 10% of your income to the Church will free a child's soul from Limbo into Heaven." 
- 
+
 Referring Expressions:  Your income: a, church: b, child's soul: c, limbo: d, heaven: e
  
 Properties: IsGiven(a,b), IsInLimbo(c), IsInHeaven(e)
 
-Logical Form: (IsGiven(a,b) & IsInLimbo(c)) -> IsInHeaven(e) 
+Logical Form: Implies(And(IsGiven(a,b), IsInLimbo(c)), IsInHeaven(e))
 
 Example 4:
 
 Input Sentence: "A bald man is touching another person."
 
-Referring expressions:
+Referring expressions: A bald man: a, another person: b
 
-Properties: A bald man: a, another person: b
+Properties: IsBald(a), IsTouching(a,b)
 
-LogicalForm: IsBald(a) & IsTouching(a,b)
+Logical Form: Exists(a, Exists(b, And(IsBald(a), IsTouching(a,b))))

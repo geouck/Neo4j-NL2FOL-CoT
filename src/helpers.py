@@ -5,24 +5,39 @@ def label_values(input_string,map):
     values = input_string.split(',')
     if isinstance(map,str):
         map = ast.literal_eval(map)
-    labeled_values = [f"{v}: {map[v]}" for v in values]
+    labeled_values = []
+    for v in values:
+        # Fallbacks for mismatching keys due to stripping/lowercasing
+        if v in map:
+            labeled_values.append(f"{v}: {map[v]}")
+        elif v.strip() in map:
+            labeled_values.append(f"{v}: {map[v.strip()]}")
+        elif v.strip().lower() in map:
+            labeled_values.append(f"{v}: {map[v.strip().lower()]}")
+        else:
+            # Last resort
+            labeled_values.append(f"{v}: {map.get(v, '?')}")
     return ', '.join(labeled_values)
 
 def first_non_empty_line(string):
-  """Extracts the first non-empty line from a string.
+  """Extracts the first non-empty line from a string that looks like a logical property.
 
   Args:
     string: The string to extract the first non-empty line from.
 
   Returns:
-    The first non-empty line from the string.
+    The first line containing a parenthesis if any, else the last non-empty line, else None.
   """
-  lines = string.splitlines()
+  lines = [l.strip() for l in string.splitlines() if l.strip()]
+  if not lines:
+      return None
+      
   for line in lines:
-    if line:
+    if '(' in line and ')' in line:
       return line
 
-  return None
+  # Fallback to the last non-empty line as it's often the actual answer after conversational filler
+  return lines[-1]
 
 def extract_propositional_symbols(logical_form):
     symbols = re.findall(r'\b[a-z]\b', logical_form)
@@ -78,18 +93,23 @@ def fix_inconsistent_arities(clauses1, clauses2):
     fixed_clauses1 = []
     fixed_clauses2 = []
     for clause in clauses1:
+        if '(' not in clause or ')' not in clause:
+            fixed_clauses1.append(clause)
+            continue
         predicate = clause.split('(')[0]
         args = clause.split('(')[1].split(')')[0].split(',')
         arity = len(args)
         
         if arity > predicates[predicate]:
-            # Keep only necessary arguments based on predicate arity
             new_clause = f"{predicate}({', '.join(args[:predicates[predicate]])})"
             fixed_clauses1.append(new_clause)
         else:
             fixed_clauses1.append(clause)
     
     for clause in clauses2:
+        if '(' not in clause or ')' not in clause:
+            fixed_clauses2.append(clause)
+            continue
         predicate = clause.split('(')[0]
         args = clause.split('(')[1].split(')')[0].split(',')
         arity = len(args)
@@ -108,6 +128,9 @@ def replace_variables(mapping, clause):
     reversed_mapping = {v: k for k, v in mapping.items()}
 
     # Replace characters with corresponding strings from the reversed mapping
+    if '(' not in clause or ')' not in clause:
+        return clause
+        
     replaced_clause = clause
     predicate = clause.split('(')[0]
     args = clause.split('(')[1][:-1].split(',')
